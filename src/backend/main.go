@@ -14,7 +14,10 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/vmihailenco/msgpack/v5"
 )
+
+type Empty struct{}
 
 type syncedLoggerData struct {
 	writers []io.Writer
@@ -75,12 +78,19 @@ type handlerData struct {
 	lg   *log.Logger
 	wg   *sync.WaitGroup
 	// When the server wants to shutdown, the channel will be closed and the context will be cancelled
-	quitChan     chan struct{}
+	quitChan     chan Empty
 	quitCtx      context.Context
 	closeTimeout time.Duration
 }
 
+type ClientMsg struct {
+	What      string `msgpack:"what"`
+	RequestId any    `msgpack:"requestId"`
+	Data      any    `msgpack:"data"`
+}
+
 func main() {
+
 	logPath := "wizard.log"
 	logFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
@@ -94,7 +104,7 @@ func main() {
 
 	wg := sync.WaitGroup{}
 
-	quitChan := make(chan struct{})
+	quitChan := make(chan Empty)
 	quitCtx, cancelFunc := context.WithCancelCause(context.Background())
 	wg.Add(1)
 	go func() {
@@ -132,7 +142,7 @@ func main() {
 			lg.Printf("Failed to upgrade connection to WebSocket: %v.\n", err)
 		} else {
 			lg.Println("Upgraded to WebSocket.")
-			handleWebSocketConnection(handlerData{
+			handleWebSocketConnection(&handlerData{
 				conn:         conn,
 				lg:           lg,
 				wg:           &wg,
@@ -157,7 +167,7 @@ func main() {
 	chanTerm := make(chan os.Signal, 1)
 	signal.Notify(chanTerm, syscall.SIGTERM, syscall.SIGINT)
 
-	serverCloseChan := make(chan struct{}, 1)
+	serverCloseChan := make(chan Empty, 1)
 	lgMain.Printf("Starting server on %s...\n", server.Addr)
 	wg.Add(1)
 	go func() {
@@ -165,7 +175,7 @@ func main() {
 		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			lgMain.Printf("server.ListenAndServer error: %v\n", err)
 		}
-		serverCloseChan <- struct{}{}
+		serverCloseChan <- Empty{}
 	}()
 
 	select {
@@ -195,7 +205,7 @@ func main() {
 	lgMain.Println("Done.")
 }
 
-func handleWebSocketConnection(hData handlerData) {
+func handleWebSocketConnection(hData *handlerData) {
 
 	// This channel accepts the string that is sent as a close message.
 	// There are 3 ways to call it (via the quit channel and via an
@@ -222,7 +232,7 @@ func handleWebSocketConnection(hData handlerData) {
 				websocket.FormatCloseMessage(1, errMsg),
 				time.Now().Add(hData.closeTimeout),
 			)
-			if err == nil {
+			if err != nil {
 				hData.lg.Printf("Error sending close message: %v.\n", err)
 			}
 		}
@@ -235,16 +245,27 @@ func handleWebSocketConnection(hData handlerData) {
 
 	// read loop
 	for {
-		messageType, message, err := hData.conn.ReadMessage()
+		messageType, bMsg, err := hData.conn.ReadMessage()
 		if err != nil {
 			hData.lg.Printf("conn.ReadMessage error: %v.\n", err)
 			closeWsChan <- ""
 			break
 		}
-		hData.lg.Printf("<-- received message type %d with %d bytes.\n", messageType, len(message))
+		hData.lg.Printf("<-- received message type %d with %d bytes.\n", messageType, len(bMsg))
 		if messageType != websocket.BinaryMessage {
 			closeWsChan <- fmt.Sprintf("expected binary message but got type %d", messageType)
 			break
+		}
+
+		var mpMsg ClientMsg
+		err = msgpack.Unmarshal(bMsg, &mpMsg)
+		if err == nil {
+			err = processMsg(hData, mpMsg, len(bMsg))
+			if err != nil {
+				closeWsChan <- fmt.Sprintf("error processing msg: %v", err)
+			}
+		} else {
+			closeWsChan <- fmt.Sprintf("error decoding msgpack: %v", err)
 		}
 	}
 	close(closeWsChan)
