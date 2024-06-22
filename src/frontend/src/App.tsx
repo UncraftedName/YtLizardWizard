@@ -1,5 +1,5 @@
 /** Import components */
-import WebSocketWrapper from "./components/WebSocketWrapper";
+import WebSocketWrapper from "#/components/WebSocketWrapper";
 
 function App() {
   return (
