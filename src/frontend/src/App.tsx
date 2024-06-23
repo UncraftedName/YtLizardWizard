@@ -1,7 +1,20 @@
+/** Import contexts */
+import { usePoopStore } from "./store/PoopStore";
 /** Import components */
 import WebSocketWrapper from "#/components/WebSocketWrapper";
+import { useEffect } from "react";
 
 function App() {
+  const { initSocket, closeSocket } = usePoopStore();
+
+  useEffect(() => {
+    initSocket();
+
+    return () => {
+      closeSocket();
+    };
+  }, [initSocket, closeSocket]);
+
   return (
     <div className="h-screen w-screen bg-slate-200">
       <div className="grid w-full place-content-center p-4">
