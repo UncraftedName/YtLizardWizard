@@ -83,12 +83,6 @@ type handlerData struct {
 	closeTimeout time.Duration
 }
 
-type ClientMsg struct {
-	What      string `msgpack:"what"`
-	RequestId any    `msgpack:"requestId"`
-	Data      any    `msgpack:"data"`
-}
-
 func main() {
 
 	logPath := "wizard.log"

@@ -1,13 +1,21 @@
+/** Import react hooks */
 import { useState, useRef, useEffect } from "react";
+/** Import msgpack */
 import { unpack, pack } from "msgpackr";
+/** Import components */
+import PlaylistTable from "./PlaylistTable";
+/** Import types */
+import type { ClientMsg, ServerMsg } from "#/types/Backend";
+import type { PlaylistSendData } from "#/types/BackendResponseData";
 
 export default function WebSocketWrapper() {
   const [socketStage, setSocketStage] = useState<
     "Init" | "Connected" | "Failed"
   >("Init");
   const socket = useRef<WebSocket>();
-  // eslint-disable-next-line
-  const [message, setMessage] = useState<any>(null);
+  const [getPlaylistsResponse, setGetPlaylistsResponse] = useState<ServerMsg<
+    PlaylistSendData[]
+  > | null>(null);
 
   // Connect and disconnect the socket ref.
   useEffect(() => {
@@ -16,8 +24,12 @@ export default function WebSocketWrapper() {
     socket.current.onopen = () => setSocketStage("Connected");
     socket.current.onerror = () => setSocketStage("Failed");
     socket.current.onmessage = (event) => {
-      console.log("message received from backend");
-      setMessage(unpack(event.data));
+      const response = unpack(event.data) as unknown as ServerMsg<
+        PlaylistSendData[]
+      >;
+      if (response.what === "PLAYLIST_INFO_UPDATE") {
+        setGetPlaylistsResponse(response);
+      }
     };
 
     return () => {
@@ -26,25 +38,18 @@ export default function WebSocketWrapper() {
     };
   }, []);
 
+  // Get playlists
   useEffect(() => {
     if (socketStage !== "Connected" || !socket.current) return;
 
-    // Let's send some massages ;)
-    const initRequestObj = {
-      what: "INIT",
-      requestId: "bob",
+    const initRequestObj: ClientMsg = {
+      what: "GET_PLAYLISTS",
+      requestId: 0,
       data: null,
     };
     const packedRequest = pack(initRequestObj);
     socket.current.send(packedRequest);
   }, [socketStage]);
-
-  useEffect(() => {
-    if (message !== null) {
-      console.log("New message received:");
-      console.log(message);
-    }
-  }, [message]);
 
   // Styling "stage" text
   let stageColor = "text-black";
@@ -58,7 +63,9 @@ export default function WebSocketWrapper() {
         WebSocket init stage:{" "}
         <span className={`${stageColor}`}>{socketStage}</span>
       </h3>
-      {/* <div>{message}</div> */}
+      {getPlaylistsResponse && (
+        <PlaylistTable playlists={getPlaylistsResponse.data} />
+      )}
     </>
   );
 }

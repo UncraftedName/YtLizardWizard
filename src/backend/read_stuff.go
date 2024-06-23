@@ -28,7 +28,13 @@ const (
 	MsgSendTypeDelete string = "DELETE"
 )
 
-type responseTemplate struct {
+type ClientMsg struct {
+	What      string `msgpack:"what"`
+	RequestId any    `msgpack:"requestId"`
+	Data      any    `msgpack:"data"`
+}
+
+type ServerMsg struct {
 	What      string `msgpack:"what"`
 	RequestId any    `msgpack:"requestId"`
 	Final     bool   `msgpack:"final"`
@@ -99,7 +105,7 @@ func processMsg(hData *handlerData, msg ClientMsg, msgLen int) error {
 
 	hData.lg.Printf("<-- received message \"%s\" (%d bytes).\n", msg.What, msgLen)
 
-	quickSend := func(data *responseTemplate) {
+	quickSend := func(data *ServerMsg) {
 		b, err := msgpack.Marshal(data)
 		if err != nil {
 			panic(err)
@@ -116,7 +122,7 @@ func processMsg(hData *handlerData, msg ClientMsg, msgLen int) error {
 
 	switch msg.What {
 	case "INIT":
-		quickSend(&responseTemplate{
+		quickSend(&ServerMsg{
 			What:      MsgSendTypeInit,
 			RequestId: msg.RequestId,
 			Final:     true,
@@ -126,7 +132,7 @@ func processMsg(hData *handlerData, msg ClientMsg, msgLen int) error {
 			},
 		})
 	case "GET_PLAYLISTS":
-		quickSend(&responseTemplate{
+		quickSend(&ServerMsg{
 			What:      MsgSendTypePl,
 			RequestId: msg.RequestId,
 			Final:     true,
@@ -154,7 +160,7 @@ func processMsg(hData *handlerData, msg ClientMsg, msgLen int) error {
 			},
 		})
 	case "ADD_PLAYLIST":
-		quickSend(&responseTemplate{
+		quickSend(&ServerMsg{
 			What:      MsgSendTypePl,
 			RequestId: msg.RequestId,
 			Final:     true,
@@ -172,7 +178,7 @@ func processMsg(hData *handlerData, msg ClientMsg, msgLen int) error {
 			},
 		})
 	case "GET_CHANNELS":
-		quickSend(&responseTemplate{
+		quickSend(&ServerMsg{
 			What:      MsgSendTypeChan,
 			RequestId: msg.RequestId,
 			Final:     true,
@@ -207,7 +213,7 @@ func processMsg(hData *handlerData, msg ClientMsg, msgLen int) error {
 			},
 		})
 	case "DOWNLOAD_PLAYLISTS":
-		quickSend(&responseTemplate{
+		quickSend(&ServerMsg{
 			What:      MsgSendTypeChan,
 			RequestId: msg.RequestId,
 			Final:     false,
@@ -223,7 +229,7 @@ func processMsg(hData *handlerData, msg ClientMsg, msgLen int) error {
 				},
 			},
 		})
-		quickSend(&responseTemplate{
+		quickSend(&ServerMsg{
 			What:      MsgSendTypeVid,
 			RequestId: msg.RequestId,
 			Final:     true,
@@ -240,7 +246,7 @@ func processMsg(hData *handlerData, msg ClientMsg, msgLen int) error {
 			},
 		})
 	case "GET_VIDEO_INFO":
-		quickSend(&responseTemplate{
+		quickSend(&ServerMsg{
 			What:      MsgSendTypeVid,
 			RequestId: msg.RequestId,
 			Final:     true,
@@ -266,7 +272,7 @@ func processMsg(hData *handlerData, msg ClientMsg, msgLen int) error {
 			},
 		})
 	case "DOWNLOAD_VIDEO_DATA":
-		quickSend(&responseTemplate{
+		quickSend(&ServerMsg{
 			What:      "NOT_IMPLEMENTED",
 			RequestId: msg.RequestId,
 			Final:     true,
