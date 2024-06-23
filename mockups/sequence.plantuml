@@ -33,15 +33,29 @@ note right
     in a single response - the returned
     order matters.
 end note
-FE --> User: update UI
+FE -> User: update UI
 
 
 == Reorder playlists ==
 
 User -> FE: user reorders playlists
 FE -> User: update UI
-& FE --> BE: what: REODER_PLAYLISTS\ndata: new order OR delta to current order
+& FE --> BE: what: REORDER_PLAYLISTS\ndata: new order OR delta to current order
 BE -> DB
+
+== Add playlists ==
+
+User -> FE: user adds playlist(s) URL
+FE -> User: update UI
+& FE --> BE ++ #Salmon: what: ADD_PLAYLISTS\ndata: list of URLs
+note left
+    Order of playlists matters - the lowest added
+    order is 'max(orders) + 1' going up by one.
+end note
+BE <--> YT: fetch playlist info
+BE -> DB
+BE --> FE --: what: PLAYLIST_INFO_UPDATE\ndata: list of playlists
+FE -> User: update UI
 
 == Remove playlist ==
 
@@ -134,7 +148,7 @@ User -> FE: user wants to download audio
 FE -> User: spinner\n(represents all audio downloads)
 & FE --> BE ++ #Salmon: what: DOWNLOAD_AUDIO\ndata: null
 group Get audio (repeat)
-    BE --> YT: fetch audio
+    BE <--> YT: fetch audio
     & BE --> FE: what: DOWNLOAD_AUDIO_PROGRESS\ndata: video progress
     activate BE #Maroon
     note right
@@ -142,7 +156,6 @@ group Get audio (repeat)
         updates to progress during
         the download
     end note
-    YT <--> BE
     FE -> User: progress bar\n(represents this audio download)
     & BE -> DB
     BE --> FE: what: DOWNLOAD_AUDIO_PROGRESS\ndata: video progress
