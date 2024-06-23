@@ -1,0 +1,161 @@
+@startuml Requests
+
+!pragma teoz true
+
+Entity YouTube as YT
+database "Local DB" as DB
+participant Backend as BE
+participant Frontend as FE
+actor User
+
+== Initialization ==
+
+User -> FE: select DB file
+FE -> BE: what: INIT\ndata: null
+note left
+    This should be the first message sent
+    to the backend and the frontend should
+    wait for the response. If this is sent
+    later, the backend will cancel all
+    pending responses and INIT again.
+end note
+BE <-> DB: initialize, get settings
+BE -> FE: what: INIT\ndata: map[string,any]
+FE -> User: display landing page
+
+== Display saved playlists ==
+
+FE --> BE ++ #Salmon: what: GET_PLAYLISTS\ndata: null
+BE <-> DB: fetch all playlists
+BE --> FE --: what: PLAYLIST_INFO_UPDATE\ndata: list of playlists
+note right
+    The backend will send all playlists
+    in a single response - the returned
+    order matters.
+end note
+FE --> User: update UI
+
+
+== Reorder playlists ==
+
+User -> FE: user reorders playlists
+FE -> User: update UI
+& FE --> BE: what: REODER_PLAYLISTS\ndata: new order OR delta to current order
+BE -> DB
+
+== Remove playlist ==
+
+User -> FE: request to remove a playlist
+FE -> User: update UI
+& FE --> BE: what: REMOVE_PLAYLISTS\ndata: list of playlist IDs
+note left
+    This may interfere with playlists that are
+    currently being downloaded. If this happens,
+    those downloads are canceled and {final:true}
+    is returned for the corresponding responses.
+end note
+BE -> DB
+
+== Display saved channels ==
+
+FE --> BE ++ #Salmon: what: GET_CHANNELS\ndata: null
+BE <-> DB: fetch all channels
+BE --> FE --: what: CHANNEL_INFO_UPDATE\ndata: list of channels
+note right: order of channels does not matter
+FE -> User: update UI
+
+== Display saved videos ==
+
+FE --> BE ++ #Salmon: what: GET_VIDEOS\ndata: null
+group Get videos (repeat)
+    BE <-> DB: fetch (some) videos
+    BE --> FE: what: VIDEO_INFO_UPDATE\ndata: list of videos
+    note right: order of videos does not matter
+    FE -> User: update UI
+end
+group Get thumbnails (repeat)
+    BE <-> DB: fetch a thumbnail
+    BE --> FE: what: VIDEO_THUMBNAIL_UPDATE\ndata: list of thumbnails
+    FE -> User: update UI
+end
+BE --> FE --: what: VIDEO_INFO_UPDATE\ndata: empty list\nfinal: true
+note right
+    the final response will
+    probably not be separate
+end note
+
+== Set a video to be downloadable ==
+User -> FE: user specifies that they want\nor don't want a video to be\ndownloaded
+FE --> BE: what: SET_VIDEOS_DOWNLOADABLE\ndata: List[video ID, bool]
+BE -> DB
+note right: ignored if the video is already downloaded
+
+== Download playlists ==
+
+User -> FE: user wants to download\nvideos & channels in all playlists
+FE --> BE ++ #Salmon: what: DOWNLOAD_PLAYLISTS\ndata: null
+& FE -> User: spinner
+group Get playlist info (repeat)
+    BE <--> YT: get playlist info
+    alt #TECHNOLOGY success
+        BE -> DB
+        group Update channels
+            BE --> FE: what: CHANNEL_INFO_UPDATE\ndata: list of channels
+            BE --> FE: what: OBJECT_DELETE\ndata: list of channel IDs
+            FE -> User: Update UI
+        end
+        group Update videos
+            BE --> FE: what: VIDEO_INFO_UPDATE\ndata: list of videos
+            BE --> FE: what: OBJECT_DELETE\ndata: list of videos
+            FE -> User: Update UI
+        end
+        group Get thumbnails (repeat)
+            BE <--> YT: fetch thumbnail
+            BE -> DB
+            BE --> FE: what: THUMBNAIL_DATA_UPDATE\ndata: list of thumbnails
+            BE --> FE: what: OBJECT_DELETE\ndata: list of thumbnails
+            FE -> User: Update UI
+        end
+    else #Pink failure e.g. playlist is private
+        BE --> FE: what: PLAYLIST_INFO_UPDATE\ndata: list of playlists
+        FE -> User: Update UI
+    end
+end
+BE --> FE --: THUMBNAIL_DATA_UPDATE\ndata: empty list\nfinal: true
+note right
+    the final response
+    may not be separate
+end note
+FE -> User: stop spinner
+
+== Download audio ==
+
+User -> FE: user wants to download audio
+FE -> User: spinner\n(represents all audio downloads)
+& FE --> BE ++ #Salmon: what: DOWNLOAD_AUDIO\ndata: null
+group Get audio (repeat)
+    BE --> YT: fetch audio
+    & BE --> FE: what: DOWNLOAD_AUDIO_PROGRESS\ndata: video progress
+    activate BE #Maroon
+    note right
+        backend will sent multiple
+        updates to progress during
+        the download
+    end note
+    YT <--> BE
+    FE -> User: progress bar\n(represents this audio download)
+    & BE -> DB
+    BE --> FE: what: DOWNLOAD_AUDIO_PROGRESS\ndata: video progress
+    deactivate BE
+    FE -> User: stop progress bar
+end
+BE --> FE --: what: DOWNLOAD_AUDIO_PROGRESS\ndata: empty list
+note right
+    the final response
+    may not be separate
+end note
+FE -> User: stop spinner
+
+====
+
+@enduml
