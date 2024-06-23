@@ -4,8 +4,6 @@ type Props = {
   playlists: PlaylistSendData[];
 };
 export default function PlaylistTable({ playlists }: Props) {
-  console.table(playlists);
-
   return (
     <table className="w-full table-auto border-[3px] border-gray-700 text-center">
       <thead className="border border-gray-700">
@@ -21,7 +19,7 @@ export default function PlaylistTable({ playlists }: Props) {
       <tbody>
         {playlists.map((playlist, index) => {
           return (
-            <tr draggable key={playlist.id}>
+            <tr key={playlist.id}>
               <td>{index + 1}</td>
               <td>{playlist.name}</td>
               <td>{playlist.ownerChannelId}</td>

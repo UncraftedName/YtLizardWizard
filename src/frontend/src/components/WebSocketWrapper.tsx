@@ -28,7 +28,15 @@ export default function WebSocketWrapper() {
         PlaylistSendData[]
       >;
       if (response.what === "PLAYLIST_INFO_UPDATE") {
-        setGetPlaylistsResponse(response);
+        setGetPlaylistsResponse((prevResponse) => {
+          if (!prevResponse) return response;
+          else {
+            return {
+              ...prevResponse,
+              data: [...prevResponse.data, ...response.data],
+            };
+          }
+        });
       }
     };
 
@@ -51,6 +59,17 @@ export default function WebSocketWrapper() {
     socket.current.send(packedRequest);
   }, [socketStage]);
 
+  function handleAddPlaylist() {
+    if (!socket.current) return;
+
+    const request: ClientMsg = {
+      what: "ADD_PLAYLIST",
+      requestId: 1,
+      data: [], // list of urls
+    };
+    socket.current.send(pack(request));
+  }
+
   // Styling "stage" text
   let stageColor = "text-black";
   if (socketStage === "Init") stageColor = "text-yellow-400";
@@ -66,6 +85,12 @@ export default function WebSocketWrapper() {
       {getPlaylistsResponse && (
         <PlaylistTable playlists={getPlaylistsResponse.data} />
       )}
+      <button
+        className="m-4 rounded border border-gray-400 bg-slate-300 p-2 text-xl text-blue-700 shadow-xl"
+        onClick={handleAddPlaylist}
+      >
+        Add Playlist
+      </button>
     </>
   );
 }
