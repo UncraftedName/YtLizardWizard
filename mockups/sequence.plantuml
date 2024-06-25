@@ -11,7 +11,7 @@ actor User
 == Initialization ==
 
 User -> FE: select DB file
-FE -> BE: what: INIT\ndata: null
+FE -> BE ++ #Salmon: what: INIT\ndata: null
 note left
     This should be the first message sent
     to the backend and the frontend should
@@ -20,7 +20,7 @@ note left
     pending responses and INIT again.
 end note
 BE <-> DB: initialize, get settings
-BE -> FE: what: INIT\ndata: map[string,any]
+BE -> FE --: what: INIT\ndata: map[string,any]
 FE -> User: display landing page
 
 == Display saved playlists ==
@@ -43,7 +43,7 @@ FE -> User: update UI
 & FE --> BE: what: REORDER_PLAYLISTS\ndata: new order OR delta to current order
 BE -> DB
 
-== Add playlists ==
+== Add playlist(s) ==
 
 User -> FE: user adds playlist(s) URL
 FE -> User: update UI
@@ -109,8 +109,8 @@ note right: ignored if the video is already downloaded
 User -> FE: user wants to download\nvideos & channels in all playlists
 FE --> BE ++ #Salmon: what: DOWNLOAD_PLAYLISTS\ndata: null
 & FE -> User: spinner
-group Get playlist info (repeat)
-    BE <--> YT: get playlist info
+group Get playlist contents (repeat)
+    BE <--> YT: fetch videos/channels in playlist
     alt #TECHNOLOGY success
         BE -> DB
         group Update channels
