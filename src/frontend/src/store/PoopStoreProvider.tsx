@@ -29,6 +29,7 @@ export function PoopStoreContextProvider({ children }: Props) {
   const [state, dispatch] = useReducer(poopStoreReducer, {
     socketConnStatus: "INIT",
     nextMsgId: 0,
+    currentView: "playlists",
     playlists: [],
   });
 

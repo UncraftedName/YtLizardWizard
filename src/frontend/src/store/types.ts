@@ -1,9 +1,11 @@
 import type { ConnectionStatus, ClientMsgNoRequestId } from "#/types/Backend";
 import type { Playlist } from "#/types/DataTypes";
+import type { PageView } from "#/types/routing";
 
 export type PoopStoreState = {
   socketConnStatus: ConnectionStatus;
   nextMsgId: number;
+  currentView: PageView;
   playlists: Playlist[];
 };
 
@@ -14,6 +16,10 @@ export type PoopStoreActions =
     }
   | {
       type: "next-msg-id";
+    }
+  | {
+      type: "change-view";
+      payload: PageView;
     }
   | {
       type: "set-playlists";

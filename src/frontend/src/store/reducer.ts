@@ -17,6 +17,12 @@ export function poopStoreReducer(
         nextMsgId: state.nextMsgId + 1,
       };
     }
+    case "change-view": {
+      return {
+        ...state,
+        currentView: action.payload,
+      };
+    }
     case "set-playlists": {
       return {
         ...state,
