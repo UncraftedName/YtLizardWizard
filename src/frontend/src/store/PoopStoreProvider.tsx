@@ -58,8 +58,14 @@ export function PoopStoreContextProvider({ children }: Props) {
   /** Initialize the socket pointing to a specific ws: url. */
   const initSocket = useCallback(
     (wsUrl: string = "ws://localhost:8080/ws") => {
+      dispatch({
+        type: "set-connection-status",
+        payload: "INIT",
+      });
+
       socket.current = new WebSocket(wsUrl);
       socket.current.binaryType = "arraybuffer";
+
       socket.current.onopen = () => {
         dispatch({
           type: "set-connection-status",
