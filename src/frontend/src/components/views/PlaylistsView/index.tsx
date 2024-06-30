@@ -11,15 +11,22 @@ let once = true; // Prevent sendMessage in effect from being called multiple tim
 export default function PlaylistsView() {
   const { playlists, sendMessage } = usePoopStore();
 
+  useEffect(() => {
+    // Reset once when the component unmounts so we fetch data again next time the component mounts.
+    return () => {
+      once = true;
+    };
+  }, []);
+
   // Get playlists
   useEffect(() => {
-    once &&
-      sendMessage({
+    if (once) {
+      const ok = sendMessage({
         what: "GET_PLAYLISTS",
         data: null,
       });
-
-    once = false;
+      if (ok) once = false;
+    }
   }, [sendMessage]);
 
   function handleAddPlaylist() {

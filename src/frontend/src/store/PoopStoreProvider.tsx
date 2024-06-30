@@ -75,7 +75,7 @@ export function PoopStoreContextProvider({ children }: Props) {
 
   /** Initialize the socket pointing to a specific ws: url. */
   const initSocket = useCallback(
-    (wsUrl: string = "ws://localhost:8080/ws") => {
+    (wsUrl: string) => {
       dispatch({
         type: "set-connection-status",
         payload: "INIT",
@@ -120,19 +120,29 @@ export function PoopStoreContextProvider({ children }: Props) {
    * the value in this function call. This enters an infinite loop
    * and your effect or callback will re-run every rendering frame.
    */
-  const sendMessage = (msg: ClientMsgNoRequestId) => {
-    if (socket.current && socket.current.OPEN) {
-      // Attach the next message id
-      const fullMsg: ClientMsg = {
-        ...msg,
-        requestId: state.nextMsgId,
-      };
-      dispatch({ type: "next-msg-id" });
+  const sendMessage = useCallback(
+    (msg: ClientMsgNoRequestId) => {
+      if (
+        socket.current &&
+        socket.current.OPEN &&
+        state.socketConnStatus === "CONNECTED"
+      ) {
+        // Attach the next message id
+        const fullMsg: ClientMsg = {
+          ...msg,
+          requestId: state.nextMsgId,
+        };
+        dispatch({ type: "next-msg-id" });
 
-      // Send the message to the backend.
-      socket.current.send(pack(fullMsg));
-    }
-  };
+        // Send the message to the backend.
+        socket.current.send(pack(fullMsg));
+        return true;
+      }
+
+      return false;
+    },
+    [state.nextMsgId, state.socketConnStatus],
+  );
 
   return (
     <PoopStoreContext.Provider

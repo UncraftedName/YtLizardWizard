@@ -1,3 +1,4 @@
+import { Link } from "#/components/ui";
 import { Playlist } from "#/types/DataTypes";
 
 type Props = {
@@ -21,7 +22,13 @@ export default function PlaylistTable({ playlists }: Props) {
           return (
             <tr key={playlist.id}>
               <td>{index + 1}</td>
-              <td>{playlist.name}</td>
+              <td>
+                {playlist.url ? (
+                  <Link href={playlist.url}>{playlist.name}</Link>
+                ) : (
+                  playlist.name
+                )}
+              </td>
               <td>{playlist.ownerChannelId}</td>
               <td>{playlist.numVideos}</td>
               <td>{playlist.renameRulesId}</td>

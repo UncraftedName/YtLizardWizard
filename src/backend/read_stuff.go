@@ -245,7 +245,7 @@ func processMsg(hData *handlerData, msg ClientMsg, msgLen int) error {
 				},
 			},
 		})
-	case "GET_VIDEO_INFO":
+	case "GET_VIDEOS":
 		quickSend(&ServerMsg{
 			What:      MsgSendTypeVid,
 			RequestId: msg.RequestId,

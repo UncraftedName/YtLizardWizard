@@ -1,3 +1,4 @@
+import { Link } from "#/components/ui";
 import { Video } from "#/types/DataTypes";
 
 type Props = {
@@ -20,7 +21,13 @@ export default function VideosTable({ videos }: Props) {
           return (
             <tr key={video.id}>
               <td>{index + 1}</td>
-              <td>{video.name}</td>
+              <td>
+                {video.url ? (
+                  <Link href={video.url}>{video.name}</Link>
+                ) : (
+                  video.name
+                )}
+              </td>
               <td>{video.lengthMs}</td>
               <td>{video.renameRulesId}</td>
               <td>{video.status}</td>

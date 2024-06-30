@@ -10,15 +10,22 @@ let once = true; // Prevent sendMessage in effect from being called multiple tim
 export default function ChannelsView() {
   const { channels, sendMessage } = usePoopStore();
 
+  useEffect(() => {
+    // Reset once when the component unmounts so we fetch data again next time the component mounts.
+    return () => {
+      once = true;
+    };
+  }, []);
+
   // Get channels
   useEffect(() => {
-    once &&
-      sendMessage({
+    if (once) {
+      const ok = sendMessage({
         what: "GET_CHANNELS",
         data: null,
       });
-
-    once = false;
+      if (ok) once = false;
+    }
   }, [sendMessage]);
 
   return (

@@ -12,7 +12,7 @@ function App() {
 
   // Connect to the server using a web socket.
   useEffect(() => {
-    initSocket();
+    initSocket("ws://localhost:8080/ws");
     return () => {
       closeSocket();
     };
@@ -27,7 +27,7 @@ function App() {
     <>
       <Header />
       <ViewsMenu />
-      {socketConnStatus === "CONNECTED" && view}
+      {view}
       {socketConnStatus === "FAILED" && (
         <ErrorMessage text="Something went wrong connecting to the server." />
       )}

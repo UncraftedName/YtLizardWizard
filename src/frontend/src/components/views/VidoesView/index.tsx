@@ -4,23 +4,28 @@ import { useEffect } from "react";
 import usePoopStore from "#/store/usePoopStore";
 /** Import components */
 import { VideosTable } from "#/components/tables";
-import { Action } from "#/types/Backend";
 
 let once = true; // Prevent sendMessage in effect from being called multiple times.
 
 export default function VideosView() {
   const { videos, sendMessage } = usePoopStore();
 
-  // Get videos
-  /** @debug Why GET_VIDEO_INFO instead of GET_VIDEOS? */
   useEffect(() => {
-    once &&
-      sendMessage({
-        what: "GET_VIDEO_INFO" as unknown as Action,
+    // Reset once when the component unmounts so we fetch data again next time the component mounts.
+    return () => {
+      once = true;
+    };
+  }, []);
+
+  // Get videos
+  useEffect(() => {
+    if (once) {
+      const ok = sendMessage({
+        what: "GET_VIDEOS",
         data: null,
       });
-
-    once = false;
+      if (ok) once = false;
+    }
   }, [sendMessage]);
 
   return (

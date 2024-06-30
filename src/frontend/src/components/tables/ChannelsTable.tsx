@@ -1,3 +1,4 @@
+import { Link } from "#/components/ui";
 import { Channel } from "#/types/DataTypes";
 
 type Props = {
@@ -19,7 +20,13 @@ export default function ChannelsTable({ channels }: Props) {
           return (
             <tr key={channel.id}>
               <td>{index + 1}</td>
-              <td>{channel.name}</td>
+              <td>
+                {channel.url ? (
+                  <Link href={channel.url}>{channel.name}</Link>
+                ) : (
+                  channel.name
+                )}
+              </td>
               <td>{channel.numVideos}</td>
               <td>{channel.renameRulesId}</td>
             </tr>

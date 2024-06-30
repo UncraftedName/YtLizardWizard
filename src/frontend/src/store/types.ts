@@ -38,9 +38,12 @@ export type PoopStoreActions =
 
 export type PoopStoreHelpers = {
   /** Initialize the socket pointing to a specific ws: url. */
-  initSocket: (wsUrl?: string) => void;
+  initSocket: (wsUrl: string) => void;
   /** Close the socket when the project unmounts. */
   closeSocket: () => void;
-  /** Send a client message to the server. */
-  sendMessage: (msg: ClientMsgNoRequestId) => void;
+  /**
+   * Send a client message to the server. Returns false if the socket isn't connected
+   * to the server.
+   */
+  sendMessage: (msg: ClientMsgNoRequestId) => boolean;
 };
