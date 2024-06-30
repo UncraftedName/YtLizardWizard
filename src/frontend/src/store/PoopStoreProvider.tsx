@@ -75,7 +75,7 @@ export function PoopStoreContextProvider({ children }: Props) {
       socket.current.onclose = () => {
         dispatch({
           type: "set-connection-status",
-          payload: "INIT",
+          payload: "CLOSED",
         });
       };
       socket.current.onmessage = messageHandler;

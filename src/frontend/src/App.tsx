@@ -3,6 +3,7 @@ import { useEffect } from "react";
 /** Import contexts */
 import usePoopStore from "#/store/usePoopStore";
 /** Import components */
+import ErrorMessage from "./components/ErrorMessage";
 import WebSocketWrapper from "#/components/WebSocketWrapper";
 import PlaylistTable from "#/components/PlaylistTable";
 
@@ -27,6 +28,12 @@ function App() {
           <div className="h-4 w-4 animate-bounce place-self-end rounded-full bg-green-500"></div>
         </div>
       </div>
+      {socketConnStatus === "FAILED" && (
+        <ErrorMessage text="Something went wrong connecting to the server." />
+      )}
+      {socketConnStatus === "CLOSED" && (
+        <ErrorMessage text="The socket has been closed by the server." />
+      )}
       {socketConnStatus === "CONNECTED" && (
         <>
           <WebSocketWrapper />

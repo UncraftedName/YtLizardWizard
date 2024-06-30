@@ -1,5 +1,5 @@
 /** Status of connecting to the backend websocket. */
-export type ConnectionStatus = "INIT" | "CONNECTED" | "FAILED";
+export type ConnectionStatus = "INIT" | "CONNECTED" | "FAILED" | "CLOSED";
 
 /**
  * Structure of messages sent to the backend.
