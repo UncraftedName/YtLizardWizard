@@ -159,7 +159,7 @@ func processMsg(hData *handlerData, msg ClientMsg, msgLen int) error {
 				},
 			},
 		})
-	case "ADD_PLAYLIST":
+	case "ADD_PLAYLISTS":
 		quickSend(&ServerMsg{
 			What:      MsgSendTypePl,
 			RequestId: msg.RequestId,
