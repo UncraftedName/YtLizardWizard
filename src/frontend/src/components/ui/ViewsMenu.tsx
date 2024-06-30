@@ -1,5 +1,5 @@
 import usePoopStore from "#/store/usePoopStore";
-import type { PageView } from "#/types/routing";
+import type { PageView } from "#/types/Routing";
 
 export default function ViewsMenu() {
   const { currentView, dispatch } = usePoopStore();

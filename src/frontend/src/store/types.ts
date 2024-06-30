@@ -1,12 +1,14 @@
 import type { ConnectionStatus, ClientMsgNoRequestId } from "#/types/Backend";
-import type { Playlist } from "#/types/DataTypes";
-import type { PageView } from "#/types/routing";
+import type { Playlist, Channel, Video } from "#/types/DataTypes";
+import type { PageView } from "#/types/Routing";
 
 export type PoopStoreState = {
   socketConnStatus: ConnectionStatus;
   nextMsgId: number;
   currentView: PageView;
   playlists: Playlist[];
+  channels: Channel[];
+  videos: Video[];
 };
 
 export type PoopStoreActions =
@@ -24,6 +26,14 @@ export type PoopStoreActions =
   | {
       type: "set-playlists";
       payload: Playlist[];
+    }
+  | {
+      type: "set-channels";
+      payload: Channel[];
+    }
+  | {
+      type: "set-videos";
+      payload: Video[];
     };
 
 export type PoopStoreHelpers = {

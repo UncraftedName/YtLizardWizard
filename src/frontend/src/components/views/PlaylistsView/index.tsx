@@ -3,12 +3,12 @@ import { useEffect } from "react";
 /** Import contexts */
 import usePoopStore from "#/store/usePoopStore";
 /** Import components */
-import PlaylistTable from "#/components/tables/PlaylistTable";
+import { PlaylistTable } from "#/components/tables";
 import { Button } from "#/components/ui";
 
 let once = true; // Prevent sendMessage in effect from being called multiple times.
 
-export default function PlaylistView() {
+export default function PlaylistsView() {
   const { playlists, sendMessage } = usePoopStore();
 
   // Get playlists

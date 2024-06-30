@@ -29,6 +29,18 @@ export function poopStoreReducer(
         playlists: action.payload,
       };
     }
+    case "set-channels": {
+      return {
+        ...state,
+        channels: action.payload,
+      };
+    }
+    case "set-videos": {
+      return {
+        ...state,
+        videos: action.payload,
+      };
+    }
     default: {
       console.error("Unknown action type:", action);
       return { ...state };

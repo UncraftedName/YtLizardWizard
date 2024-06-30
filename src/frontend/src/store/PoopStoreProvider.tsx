@@ -31,6 +31,8 @@ export function PoopStoreContextProvider({ children }: Props) {
     nextMsgId: 0,
     currentView: "playlists",
     playlists: [],
+    channels: [],
+    videos: [],
   });
 
   /** Message handler for messages received from the backend. */
@@ -52,6 +54,21 @@ export function PoopStoreContextProvider({ children }: Props) {
           type: "set-playlists",
           payload: serverMsg.data,
         });
+        break;
+      }
+      case "CHANNEL_INFO_UPDATE": {
+        dispatch({
+          type: "set-channels",
+          payload: serverMsg.data,
+        });
+        break;
+      }
+      case "VIDEO_INFO_UPDATE": {
+        dispatch({
+          type: "set-videos",
+          payload: serverMsg.data,
+        });
+        break;
       }
     }
   }, []);
