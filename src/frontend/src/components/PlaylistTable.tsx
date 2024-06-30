@@ -1,7 +1,7 @@
-import { PlaylistSendData } from "#/types/BackendResponseData";
+import { Playlist } from "#/types/DataTypes";
 
 type Props = {
-  playlists: PlaylistSendData[];
+  playlists: Playlist[];
 };
 export default function PlaylistTable({ playlists }: Props) {
   return (

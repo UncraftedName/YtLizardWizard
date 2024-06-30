@@ -1,4 +1,4 @@
-export type PlaylistSendData = {
+export type Playlist = {
   id: number;
   version: number;
   name: string;

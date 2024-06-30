@@ -1,15 +1,17 @@
+/** Import react hooks */
+import { useEffect } from "react";
 /** Import contexts */
-import { usePoopStore } from "./store/PoopStore";
+import usePoopStore from "#/store/usePoopStore";
 /** Import components */
 import WebSocketWrapper from "#/components/WebSocketWrapper";
-import { useEffect } from "react";
+import PlaylistTable from "#/components/PlaylistTable";
 
 function App() {
-  const { initSocket, closeSocket } = usePoopStore();
+  const { playlists, socketConnStatus, initSocket, closeSocket } =
+    usePoopStore();
 
   useEffect(() => {
     initSocket();
-
     return () => {
       closeSocket();
     };
@@ -25,7 +27,12 @@ function App() {
           <div className="h-4 w-4 animate-bounce place-self-end rounded-full bg-green-500"></div>
         </div>
       </div>
-      <WebSocketWrapper />
+      {socketConnStatus === "CONNECTED" && (
+        <>
+          <WebSocketWrapper />
+          <PlaylistTable playlists={playlists} />
+        </>
+      )}
     </div>
   );
 }
