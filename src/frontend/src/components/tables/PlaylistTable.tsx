@@ -29,9 +29,13 @@ export default function PlaylistTable({ playlists }: Props) {
                   playlist.name
                 )}
               </td>
-              <td>{playlist.ownerChannelId}</td>
-              <td>{playlist.numVideos}</td>
-              <td>{playlist.renameRulesId}</td>
+              <td className="italic">
+                id: {playlist.ownerChannelId.toString()}
+              </td>
+              <td>{playlist.numVideos.toString()}</td>
+              <td className="italic">
+                id: {playlist.renameRulesId.toString()}
+              </td>
               <td>{playlist.status}</td>
             </tr>
           );

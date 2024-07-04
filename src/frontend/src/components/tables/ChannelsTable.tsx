@@ -27,8 +27,8 @@ export default function ChannelsTable({ channels }: Props) {
                   channel.name
                 )}
               </td>
-              <td>{channel.numVideos}</td>
-              <td>{channel.renameRulesId}</td>
+              <td>{channel.numVideos.toString()}</td>
+              <td className="italic">id: {channel.renameRulesId.toString()}</td>
             </tr>
           );
         })}

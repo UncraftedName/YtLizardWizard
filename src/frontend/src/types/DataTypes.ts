@@ -1,31 +1,31 @@
 export type Playlist = {
-  id: number;
-  version: number;
+  id: bigint;
+  version: bigint;
   name: string;
   url: string;
-  ownerChannelId: number;
-  numVideos: number;
+  ownerChannelId: bigint;
+  numVideos: bigint;
   status: string;
-  renameRulesId: number;
+  renameRulesId: bigint;
 };
 
 export type Channel = {
-  id: number;
-  version: number;
+  id: bigint;
+  version: bigint;
   name: string;
   url: string;
-  numVideos: number;
+  numVideos: bigint;
   status: string;
-  renameRulesId: number;
+  renameRulesId: bigint;
 };
 
 export type Video = {
-  id: number;
-  version: number;
+  id: bigint;
+  version: bigint;
   name: string;
   url: string;
-  lengthMs: number;
-  thumbnailId: number;
+  lenMs: bigint;
+  thumbnailId: bigint;
   status: string;
-  renameRulesId: number;
+  renameRulesId: bigint;
 };

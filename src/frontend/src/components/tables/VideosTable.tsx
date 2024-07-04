@@ -28,8 +28,8 @@ export default function VideosTable({ videos }: Props) {
                   video.name
                 )}
               </td>
-              <td>{video.lengthMs}</td>
-              <td>{video.renameRulesId}</td>
+              <td>{video.lenMs.toString()}</td>
+              <td className="italic">id: {video.renameRulesId.toString()}</td>
               <td>{video.status}</td>
             </tr>
           );
