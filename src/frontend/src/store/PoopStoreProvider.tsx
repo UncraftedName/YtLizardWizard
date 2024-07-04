@@ -27,6 +27,8 @@ export function PoopStoreContextProvider({ children }: Props) {
 
   const nextMsgId = useRef<number>(0);
 
+  const activeMsgIds = useRef<Set<number>>(new Set());
+
   /** Poop store reducer state and dispatch. */
   const [state, dispatch] = useReducer(poopStoreReducer, {
     socketConnStatus: "INIT",
@@ -40,6 +42,8 @@ export function PoopStoreContextProvider({ children }: Props) {
   const messageHandler = useCallback((event: MessageEvent) => {
     const serverMsg: ServerMsg = unpack(event.data);
 
+    console.log(serverMsg);
+
     if (serverMsg.error) {
       console.error(
         `Backend return an error for type - ${serverMsg.what} - ${serverMsg.error}`,
@@ -47,7 +51,16 @@ export function PoopStoreContextProvider({ children }: Props) {
       return;
     }
 
-    console.log(serverMsg);
+    if (!activeMsgIds.current.has(serverMsg.requestId)) {
+      console.log(
+        "Server msg doesn't have an active request id, throwing out response.",
+      );
+      return;
+    } else {
+      if (serverMsg.final) {
+        activeMsgIds.current.delete(serverMsg.requestId);
+      }
+    }
 
     switch (serverMsg.what) {
       case "PLAYLIST_INFO_UPDATE": {
@@ -133,6 +146,7 @@ export function PoopStoreContextProvider({ children }: Props) {
           ...msg,
           requestId: nextMsgId.current,
         };
+        activeMsgIds.current.add(nextMsgId.current);
         nextMsgId.current++;
 
         // Send the message to the backend.
