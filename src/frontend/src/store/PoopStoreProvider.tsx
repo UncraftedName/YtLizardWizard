@@ -25,10 +25,11 @@ export function PoopStoreContextProvider({ children }: Props) {
   /** Ref to the web socket used in this project. */
   const socket = useRef<WebSocket | null>(null);
 
+  const nextMsgId = useRef<number>(0);
+
   /** Poop store reducer state and dispatch. */
   const [state, dispatch] = useReducer(poopStoreReducer, {
     socketConnStatus: "INIT",
-    nextMsgId: 0,
     currentView: "playlists",
     playlists: [],
     channels: [],
@@ -115,33 +116,33 @@ export function PoopStoreContextProvider({ children }: Props) {
   /**
    * Send a client message to the server.
    *
-   * WARNING - Do not use this as a dependency in a useEffect.
-   * This function depends on the state.nextMsgId value, and changes
-   * the value in this function call. This enters an infinite loop
-   * and your effect or callback will re-run every rendering frame.
+   * @returns True if the message was sent successfully.
    */
   const sendMessage = useCallback(
     (msg: ClientMsgNoRequestId) => {
-      if (
-        socket.current &&
-        socket.current.OPEN &&
-        state.socketConnStatus === "CONNECTED"
-      ) {
+      if (state.socketConnStatus === "CONNECTED") {
+        if (!socket.current || !socket.current.OPEN) {
+          console.error(
+            "Somehow socket status is set to CONNECTED without the socket being OPEN.",
+          );
+          return false;
+        }
+
         // Attach the next message id
         const fullMsg: ClientMsg = {
           ...msg,
-          requestId: state.nextMsgId,
+          requestId: nextMsgId.current,
         };
-        dispatch({ type: "next-msg-id" });
+        nextMsgId.current++;
 
         // Send the message to the backend.
         socket.current.send(pack(fullMsg));
         return true;
+      } else {
+        return false;
       }
-
-      return false;
     },
-    [state.nextMsgId, state.socketConnStatus],
+    [state.socketConnStatus],
   );
 
   return (

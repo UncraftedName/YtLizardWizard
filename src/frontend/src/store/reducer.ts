@@ -11,12 +11,6 @@ export function poopStoreReducer(
         socketConnStatus: action.payload,
       };
     }
-    case "next-msg-id": {
-      return {
-        ...state,
-        nextMsgId: state.nextMsgId + 1,
-      };
-    }
     case "change-view": {
       return {
         ...state,

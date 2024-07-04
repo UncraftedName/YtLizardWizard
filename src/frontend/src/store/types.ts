@@ -4,7 +4,6 @@ import type { PageView } from "#/types/Routing";
 
 export type PoopStoreState = {
   socketConnStatus: ConnectionStatus;
-  nextMsgId: number;
   currentView: PageView;
   playlists: Playlist[];
   channels: Channel[];
@@ -15,9 +14,6 @@ export type PoopStoreActions =
   | {
       type: "set-connection-status";
       payload: ConnectionStatus;
-    }
-  | {
-      type: "next-msg-id";
     }
   | {
       type: "change-view";
