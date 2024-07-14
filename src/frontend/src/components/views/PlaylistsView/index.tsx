@@ -24,10 +24,18 @@ export default function PlaylistsView() {
     });
   }
 
+  function handleDownloadPlaylists() {
+    sendMessage({
+      what: "DOWNLOAD_PLAYLISTS",
+      data: null,
+    });
+  }
+
   return (
     <>
       <PlaylistTable playlists={playlists} />
       <Button onClick={handleAddPlaylist}>Add Playlists</Button>
+      <Button onClick={handleDownloadPlaylists}>Download Playlists</Button>
     </>
   );
 }
